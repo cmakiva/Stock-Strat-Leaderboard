@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SITE_URL = "https://example.com/";
@@ -22,6 +23,7 @@ execFileSync(process.execPath, [path.join(repo, "engine", "prerender.mjs"), "--s
 const data = JSON.parse(fs.readFileSync(path.join(site, "data", "results.json"), "utf8"));
 const read = (p) => fs.readFileSync(path.join(out, p), "utf8");
 const pages = [["index.html", ""], ...data.strategies.map((s) => [`strategies/${s.id}/index.html`, `strategies/${s.id}/`])];
+const content = createRequire(import.meta.url)(path.join(repo, "site", "content.js"));
 
 test("every page exists with its own title, description and canonical address", () => {
   const titles = new Set();
@@ -50,6 +52,24 @@ test("strategy pages carry their own numbers and rules", () => {
   }
 });
 
+test("every strategy has approved explainer text, shown on its page", () => {
+  for (const s of data.strategies) {
+    const c = content.strategies[s.id];
+    assert.ok(c && c.how && c.watch, `${s.id} has explainer text`);
+    const html = read(`strategies/${s.id}/index.html`);
+    assert.match(html, /class="panel about"/, `${s.id} shows the About panel`);
+    assert.ok(html.includes("How it works"), `${s.id} How it works`);
+  }
+});
+
+test("How we test page", () => {
+  const html = read("how-we-test/index.html");
+  assert.ok(html.includes(`<link rel="canonical" href="${SITE_URL}how-we-test/">`));
+  assert.equal((html.match(/<h1[\s>]/g) || []).length, 1);
+  assert.ok(html.includes(`replays ${data.strategies.length} well-known trading strategies`));
+  assert.ok(html.includes("Nothing on this site is a recommendation"));
+});
+
 test("leaderboard links point at pages that exist", () => {
   const html = read("index.html");
   const links = [...html.matchAll(/class="b-row" href="([^"]+)"/g)].map((m) => m[1]);
@@ -59,7 +79,8 @@ test("leaderboard links point at pages that exist", () => {
 
 test("sitemap, robots and 404", () => {
   const sm = read("sitemap.xml");
-  assert.equal((sm.match(/<loc>/g) || []).length, pages.length);
+  assert.equal((sm.match(/<loc>/g) || []).length, pages.length + 1);
+  assert.ok(sm.includes(`<loc>${SITE_URL}how-we-test/</loc>`));
   assert.ok(sm.includes(`<loc>${SITE_URL}strategies/golden-cross/</loc>`));
   assert.ok(read("robots.txt").includes(`Sitemap: ${SITE_URL}sitemap.xml`));
   assert.match(read("404.html"), /noindex/);

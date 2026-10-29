@@ -5,10 +5,9 @@
  * Every function here returns a string and never touches the DOM.
  */
 (function (root, factory) {
-  const api = factory();
-  if (typeof module === "object" && module.exports) module.exports = api;
-  else root.BB = api;
-})(typeof self !== "undefined" ? self : this, function () {
+  if (typeof module === "object" && module.exports) module.exports = factory(require("./content.js"));
+  else root.BB = factory(root.BB_CONTENT);
+})(typeof self !== "undefined" ? self : this, function (CONTENT) {
   "use strict";
 
   const APP_NAME = "BacktestBoard"; // tentative name
@@ -191,6 +190,41 @@
     `</section>`;
   }
 
+  // Approved explainer text. *word* becomes italic; everything else is escaped.
+  function richText(t) { return esc(t).replace(/\*([^*]+)\*/g, "<em>$1</em>"); }
+
+  function about(s, root) {
+    const c = CONTENT && CONTENT.strategies[s.id];
+    if (!c) return "";
+    const intro = CONTENT.categories[s.category];
+    const parts = [
+      ["How it works", c.how],
+      ["Why it's here", c.why],
+      ["Where it comes from", c.origin],
+      ["What to watch for", c.watch],
+    ].filter(([, v]) => v);
+    return `<section class="panel about" aria-labelledby="about-title">` +
+      `<div class="panel-head"><h2 id="about-title">About ${s.benchmark ? "buy and hold" : "this strategy"}</h2>` +
+      `<a class="hint" href="${esc(root)}how-we-test/">How we test</a></div>` +
+      `<div class="about-body">` +
+        (intro ? `<p class="about-intro">${richText(intro)}</p>` : "") +
+        parts.map(([k, v]) => `<div><h3>${k}</h3><p>${richText(v)}</p></div>`).join("") +
+      `</div>` +
+    `</section>`;
+  }
+
+  function howWeTestHtml(n) {
+    const h = CONTENT.howWeTest;
+    return `<article class="panel prose">` +
+      `<h1>${esc(h.title)}</h1>` +
+      `<p class="lead">${richText(h.intro.replace("{n}", n))}</p>` +
+      h.sections.map((sec) => `<h2>${esc(sec.heading)}</h2><ul>` +
+        sec.items.map(([k, v]) => `<li>${k ? `<strong>${esc(k)}:</strong> ` : ""}${richText(v)}</li>`).join("") +
+        `</ul>`).join("") +
+      `<p class="closing">${richText(h.closing)}</p>` +
+    `</article>`;
+  }
+
   // The whole dashboard. selId = null means the home page (shows #1).
   function dashboard(data, selId, sort, root) {
     const list = ranked(data, sort);
@@ -199,7 +233,7 @@
     const rank = list.indexOf(s) + 1;
     const text = isHome ? homeHeadline(data, list, sort) : strategySummary(data, s, rank, list.length, sort);
     return summary(text, isHome) + kpis(data, s) + chartPanel(data, s, rank, sort, isHome ? "h2" : "h1") +
-      board(list, s.id, sort, root) + info(s);
+      board(list, s.id, sort, root) + info(s) + about(s, root);
   }
 
   function sortButtons(sort) {
@@ -218,6 +252,6 @@
     pct, fixed, money, tone, esc, niceDate,
     ranked, benchmark, strategyPath,
     homeTitle, homeDescription, strategyTitle, strategyDescription,
-    dashboard, sortButtons, instrument, assumptions, source,
+    dashboard, sortButtons, instrument, assumptions, source, howWeTestHtml,
   };
 });

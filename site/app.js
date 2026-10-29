@@ -151,6 +151,8 @@
       e.preventDefault();
       go(null);
     });
+    // Links into the site work from any page, even after the address changes without a reload.
+    document.querySelectorAll("a[data-root-link]").forEach((a) => { a.href = new URL(a.dataset.rootLink, ROOT).href; });
     document.getElementById("instrument").innerHTML = BB.instrument(d);
     document.getElementById("assumptions").innerHTML = BB.assumptions(d);
     document.getElementById("source").innerHTML = BB.source(d);

@@ -74,10 +74,41 @@ export function renderPage(template, data, id) {
 
 function sitemap(data) {
   const lastmod = data.period.end;
-  const urls = [SITE_URL, ...data.strategies.map((s) => SITE_URL + BB.strategyPath(s.id))];
+  const urls = [SITE_URL, ...data.strategies.map((s) => SITE_URL + BB.strategyPath(s.id)), SITE_URL + "how-we-test/"];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     urls.map((u) => `  <url><loc>${esc(u)}</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq></url>`).join("\n") +
     `\n</urlset>\n`;
+}
+
+function howWeTestPage(data) {
+  const url = SITE_URL + "how-we-test/";
+  const title = `How we test | ${BB.APP_NAME}`;
+  const description = `How ${BB.APP_NAME} backtests ${data.strategies.length} trading strategies on ${data.symbol}: the data, the rules every strategy follows, what each number means, and the limits of the results.`;
+  return `<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  ${headTags({ base: "../", title, description, url, image: `${SITE_URL}share/home.png?v=${data.period.end}`, imageAlt: `Today's top strategy on ${data.symbol} and its 12-month profit and loss` })}
+  <script>try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./">${esc(BB.APP_NAME)}</a><div class="instrument">${BB.instrument(data)}</div></header>
+  <main class="article">
+    ${BB.howWeTestHtml(data.strategies.length)}
+    <p class="back-link"><a href="./">See today's leaderboard</a></p>
+  </main>
+  <footer class="footer">
+    <p><strong>Not investment advice.</strong> Hypothetical backtests of fixed rules on past prices. Past performance does not guarantee future results.</p>
+    <p>${BB.source(data)} Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> Lightweight Charts™.</p>
+  </footer>
+</body>
+</html>
+`;
 }
 
 function notFound() {
@@ -127,12 +158,14 @@ function main() {
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, "index.html"), renderPage(template, data, s.id));
   }
+  fs.mkdirSync(path.join(OUT, "how-we-test"), { recursive: true });
+  fs.writeFileSync(path.join(OUT, "how-we-test", "index.html"), howWeTestPage(data));
   fs.writeFileSync(path.join(OUT, "sitemap.xml"), sitemap(data));
   fs.writeFileSync(path.join(OUT, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`);
   fs.writeFileSync(path.join(OUT, "404.html"), notFound());
   fs.writeFileSync(path.join(OUT, ".nojekyll"), "");
 
-  console.log(`Wrote ${data.strategies.length + 1} pages to ${OUT} for ${SITE_URL}`);
+  console.log(`Wrote ${data.strategies.length + 2} pages to ${OUT} for ${SITE_URL}`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
