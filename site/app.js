@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  const APP_NAME = "Strategy Leaderboard"; // working name; change when the name is decided
+  const APP_NAME = "BacktestBoard"; // tentative name
   const FREE_LIMIT = 10;
   const LWC = window.LightweightCharts;
 

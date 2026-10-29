@@ -1,4 +1,4 @@
-# Strategy Leaderboard (working name)
+# BacktestBoard (tentative name)
 
 Free version (Phase 1) of the S&P 500 strategy tracker. Every weekday after the market closes, it downloads SPY's daily prices, backtests 16 popular strategies over the last 12 months, and publishes a website showing which ones worked best.
 
