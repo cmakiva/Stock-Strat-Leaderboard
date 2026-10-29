@@ -30,7 +30,7 @@ export function fillRegion(html, name, content) {
   return html.replace(re, () => content);
 }
 
-function headTags({ base, title, description, url }) {
+function headTags({ base, title, description, url, image, imageAlt }) {
   return [
     `<base href="${base}">`,
     `<title>${esc(title)}</title>`,
@@ -41,7 +41,11 @@ function headTags({ base, title, description, url }) {
     `<meta property="og:title" content="${esc(title)}">`,
     `<meta property="og:description" content="${esc(description)}">`,
     `<meta property="og:url" content="${esc(url)}">`,
-    `<meta name="twitter:card" content="summary">`,
+    `<meta property="og:image" content="${esc(image)}">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+    `<meta property="og:image:alt" content="${esc(imageAlt)}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
   ].join("\n  ");
 }
 
@@ -54,6 +58,11 @@ export function renderPage(template, data, id) {
     title: isHome ? BB.homeTitle(data) : BB.strategyTitle(data, s),
     description: isHome ? BB.homeDescription(data) : BB.strategyDescription(data, s),
     url: isHome ? SITE_URL : SITE_URL + BB.strategyPath(s.id),
+    // Written by engine/share_images.py. The ?v= date makes social sites fetch the new image each day.
+    image: `${SITE_URL}share/${isHome ? "home" : s.id}.png?v=${data.period.end}`,
+    imageAlt: isHome
+      ? `Today's top strategy on ${data.symbol} and its 12-month profit and loss`
+      : `${s.name} on ${data.symbol}: 12-month return and profit and loss`,
   }));
   html = fillRegion(html, "INSTRUMENT", BB.instrument(data));
   html = fillRegion(html, "SORT", BB.sortButtons(BB.DEFAULT_SORT));

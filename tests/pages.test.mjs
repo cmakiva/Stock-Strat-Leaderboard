@@ -36,6 +36,8 @@ test("every page exists with its own title, description and canonical address", 
     assert.doesNotMatch(html, /<!--\/?(HEAD|MAIN|SORT|INSTRUMENT|ASSUMPTIONS|SOURCE)-->/, `${file} has no template markers left`);
     assert.doesNotMatch(html, /Loading the latest results/, `${file} has real content, not the loading message`);
     assert.match(html, /class="kpis"/);
+    const img = urlPath === "" ? "home" : urlPath.split("/")[1];
+    assert.ok(html.includes(`<meta property="og:image" content="${SITE_URL}share/${img}.png?v=`), `${file} share image`);
   }
   assert.equal(titles.size, pages.length, "titles are unique");
 });

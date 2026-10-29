@@ -2,3 +2,4 @@ pandas>=2.2
 numpy>=1.26
 yfinance>=0.2.54
 pytest>=8
+pillow>=10.1

@@ -13,6 +13,7 @@ It runs entirely on GitHub's free tier: GitHub Actions does the daily update and
 | `engine/backtest.py` | Simulates each strategy: signals on the close, fills at the next open, no costs |
 | `engine/providers.py` | Where price data comes from. Add a provider here to switch data sources |
 | `engine/build.py` | Runs everything and writes `site/data/results.json` |
+| `engine/share_images.py` | Draws the daily preview image shown when a page's link is shared |
 | `engine/prerender.mjs` | Writes a real page per strategy (`/strategies/<id>/`), plus `sitemap.xml`, `robots.txt` and `404.html`, so search engines can read every result |
 | `site/` | The website template (plain HTML, CSS and JavaScript, with TradingView Lightweight Charts) |
 | `site/render.js` | The page markup, shared by the browser and the pre-render step so both always match |

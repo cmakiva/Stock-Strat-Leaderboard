@@ -50,6 +50,9 @@ jobs:
       - name: Write a page for each strategy, plus sitemap and robots.txt
         run: node engine/prerender.mjs --site site --out dist
 
+      - name: Draw the share-preview images
+        run: python engine/share_images.py --data site/data/results.json --out dist/share
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
