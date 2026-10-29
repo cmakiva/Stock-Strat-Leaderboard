@@ -1,0 +1,53 @@
+name: Daily update
+
+on:
+  schedule:
+    # 22:30 UTC on weekdays: after the 4:00 pm ET close year-round (6:30 pm EDT / 5:30 pm EST).
+    - cron: "30 22 * * 1-5"
+  workflow_dispatch: {}      # lets you run it by hand from the Actions tab
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Test the backtest engine
+        run: python -m pytest -q tests
+
+      - name: Fetch SPY data and backtest all strategies
+        run: python engine/build.py --provider yahoo --out site/data/results.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    # Only runs if the build succeeded, so a failed data fetch leaves yesterday's site up.
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

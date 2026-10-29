@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strategy Leaderboard</title>
+  <meta name="description" content="Which popular trading strategies worked best on SPY over the last 12 months, updated every trading day.">
+  <script>
+    try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/" id="brand">Strategy Leaderboard</a>
+    <div class="instrument" id="instrument"></div>
+    <div class="toolbar">
+      <span class="toolbar-label" id="sort-label">Rank by</span>
+      <div class="seg" id="sort" role="group" aria-labelledby="sort-label"></div>
+      <button class="icon-btn" id="theme" type="button" aria-label="Switch to light theme">Light</button>
+    </div>
+  </header>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <main class="dash" id="app" aria-live="polite">
+    <p class="loading">Loading the latest results…</p>
+  </main>
+
+  <footer class="footer">
+    <p><strong>Not investment advice.</strong> Hypothetical backtests of fixed rules on past prices. Past performance does not guarantee future results.</p>
+    <p id="assumptions"></p>
+    <p><span id="source"></span> Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> Lightweight Charts™.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@5.0.8/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
