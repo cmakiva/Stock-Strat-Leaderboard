@@ -13,7 +13,9 @@ It runs entirely on GitHub's free tier: GitHub Actions does the daily update and
 | `engine/backtest.py` | Simulates each strategy: signals on the close, fills at the next open, no costs |
 | `engine/providers.py` | Where price data comes from. Add a provider here to switch data sources |
 | `engine/build.py` | Runs everything and writes `site/data/results.json` |
-| `site/` | The website (plain HTML, CSS and JavaScript, with TradingView Lightweight Charts) |
+| `engine/prerender.mjs` | Writes a real page per strategy (`/strategies/<id>/`), plus `sitemap.xml`, `robots.txt` and `404.html`, so search engines can read every result |
+| `site/` | The website template (plain HTML, CSS and JavaScript, with TradingView Lightweight Charts) |
+| `site/render.js` | The page markup, shared by the browser and the pre-render step so both always match |
 | `.github/workflows/update.yml` | The daily job that rebuilds and publishes the site |
 | `tests/` | Checks the backtest math, including that no strategy can see future prices |
 
@@ -37,18 +39,23 @@ Add `?sample` to the site address (for example `https://<your-username>.github.i
 
 - **Data source.** Prices come from Yahoo Finance through the free `yfinance` package. Yahoo's terms limit this data to personal use, so plan to switch to a licensed provider before the paid tier (see the requirements doc, L-03). Switching only means adding a provider in `engine/providers.py`.
 - **Scheduled jobs pause on quiet repositories.** GitHub turns off scheduled workflows in public repositories with no activity for 60 days. If the site stops updating, re-enable the workflow from the Actions tab (any commit also resets the clock).
-- **App name.** It's set in two places: `APP_NAME` at the top of `site/app.js` and the `<title>` in `site/index.html`.
+- **App name.** It's set in `APP_NAME` near the top of `site/render.js`, and in the fallback `<title>` and brand link in `site/index.html`.
+- **Site address.** `SITE_URL` at the top of `.github/workflows/update.yml` sets the address used in canonical links, the sitemap and robots.txt. When the custom domain is ready, change that one line.
 - **TradingView attribution.** The Lightweight Charts license requires the TradingView logo on the chart and the link in the footer. Leave both in place.
 
 ## Running it on your own computer (optional)
 
 Requires Python 3.10 or newer.
 
+Requires Python 3.10+ and Node.js 20+.
+
 ```
 pip install -r requirements.txt
 python -m pytest -q tests
+node --test tests/*.test.mjs
 python engine/build.py
-cd site && python -m http.server 8000
+node engine/prerender.mjs
+cd dist && python -m http.server 8000
 ```
 
 Then open http://localhost:8000.

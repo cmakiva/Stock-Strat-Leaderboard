@@ -8,6 +8,10 @@ on:
   push:
     branches: [main]
 
+env:
+  # The site's public address. When the custom domain is ready, change this one line.
+  SITE_URL: https://cmakiva.github.io/Stock-Strat-Leaderboard
+
 permissions:
   contents: read
   pages: write
@@ -28,18 +32,27 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install
         run: pip install -r requirements.txt
 
-      - name: Test the backtest engine
-        run: python -m pytest -q tests
+      - name: Test the backtest engine and page builder
+        run: |
+          python -m pytest -q tests
+          node --test tests/*.test.mjs
 
       - name: Fetch SPY data and backtest all strategies
         run: python engine/build.py --provider yahoo --out site/data/results.json
 
+      - name: Write a page for each strategy, plus sitemap and robots.txt
+        run: node engine/prerender.mjs --site site --out dist
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: dist
 
   deploy:
     # Only runs if the build succeeded, so a failed data fetch leaves yesterday's site up.

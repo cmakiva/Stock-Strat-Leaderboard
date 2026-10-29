@@ -115,13 +115,27 @@ a { color: var(--accent); }
   padding: var(--gap) 16px;
   grid-template-columns: minmax(0, 1fr) 400px;
   grid-template-areas:
-    "kpis  board"
-    "chart board"
-    "info  board";
-  grid-template-rows: auto minmax(460px, auto) auto;
+    "summary board"
+    "kpis    board"
+    "chart   board"
+    "info    board";
+  grid-template-rows: auto auto minmax(460px, auto) auto;
   max-width: 1680px;
   margin: 0 auto;
 }
+/* ---------- summary sentence ---------- */
+.summary {
+  grid-area: summary;
+  margin: 2px 0 0;
+  max-width: 70ch;
+  font: 600 19px/1.35 var(--body);
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.not-found { padding: 28px 24px; grid-column: 1 / -1; max-width: 640px; }
+.not-found h1 { margin: 0 0 8px; font: 700 26px/1.2 var(--display); font-stretch: 85%; }
+.not-found p { margin: 0 0 8px; color: var(--muted); }
+
 .loading, .error { grid-column: 1 / -1; color: var(--muted); padding: 48px 0; }
 
 .panel {
@@ -193,8 +207,9 @@ a { color: var(--accent); }
 /* ---------- leaderboard ---------- */
 .board { grid-area: board; display: flex; flex-direction: column; align-self: start; position: sticky; top: var(--gap); }
 .board ol { list-style: none; margin: 0; padding: 4px 0; }
-.board button {
-  all: unset;
+.board .b-row {
+  color: inherit;
+  text-decoration: none;
   box-sizing: border-box;
   width: 100%;
   display: grid;
@@ -205,9 +220,9 @@ a { color: var(--accent); }
   border-left: 3px solid transparent;
   cursor: pointer;
 }
-.board button:hover { background: var(--panel-2); }
-.board button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.board button[aria-current="true"] { background: var(--accent-soft); border-left-color: var(--accent); }
+.board .b-row:hover { background: var(--panel-2); }
+.board .b-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.board .b-row[aria-current="page"] { background: var(--accent-soft); border-left-color: var(--accent); }
 .b-rank { color: var(--muted); font: 700 15px/1 var(--display); font-variant-numeric: tabular-nums; }
 .b-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .b-cat { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
@@ -248,7 +263,7 @@ table.trades { width: 100%; border-collapse: collapse; font-size: 14px; font-var
 @media (max-width: 960px) {
   .dash {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "kpis" "chart" "board" "info";
+    grid-template-areas: "summary" "kpis" "chart" "board" "info";
     grid-template-rows: auto;
   }
   .board { position: static; }
@@ -257,6 +272,7 @@ table.trades { width: 100%; border-collapse: collapse; font-size: 14px; font-var
 }
 @media (max-width: 560px) {
   .dash { padding: 10px; --gap: 10px; }
+  .summary { font-size: 17px; }
   .topbar { padding: 10px; gap: 10px; }
   .kpi { padding: 10px; }
   .kpi dt { font-size: 12px; line-height: 1.25; }
